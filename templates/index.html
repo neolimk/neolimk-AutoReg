@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动网站注册登录 AI Agent</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <span>AutoReg AI</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-chart-line"></i>
+                    <span>仪表盘</span>
+                </a>
+                <a href="#" class="nav-item" data-section="credentials">
+                    <i class="fas fa-key"></i>
+                    <span>凭证管理</span>
+                </a>
+                <a href="#" class="nav-item" data-section="register">
+                    <i class="fas fa-user-plus"></i>
+                    <span>网站注册</span>
+                </a>
+                <a href="#" class="nav-item" data-section="accounts">
+                    <i class="fas fa-list"></i>
+                    <span>账号列表</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>设置</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部栏 -->
+            <header class="top-bar">
+                <div class="breadcrumb">
+                    <span id="page-title">仪表盘</span>
+                </div>
+                <div class="user-menu">
+                    <button class="btn-icon" title="刷新">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="btn-icon" title="通知">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- 内容区域 -->
+            <div class="content">
+                <!-- 仪表盘 -->
+                <section id="dashboard" class="section active">
+                    <div class="section-header">
+                        <h2>仪表盘</h2>
+                        <p>实时监控和统计信息</p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="total-accounts">0</div>
+                                <div class="stat-label">已注册账号</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon info">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="total-emails">0</div>
+                                <div class="stat-label">配置的邮箱</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon warning">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="total-phones">0</div>
+                                <div class="stat-label">配置的手机号</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon primary">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="last-update">-</div>
+                                <div class="stat-label">最后更新</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="recent-accounts">
+                        <h3>最近注册的账号</h3>
+                        <div id="recent-list" class="account-list">
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p>暂无数据</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 凭证管理 -->
+                <section id="credentials" class="section">
+                    <div class="section-header">
+                        <h2>凭证管理</h2>
+                        <p>管理你的邮箱和手机号凭证</p>
+                    </div>
+
+                    <div class="credentials-container">
+                        <!-- 邮箱管理 -->
+                        <div class="credential-panel">
+                            <div class="panel-header">
+                                <h3><i class="fas fa-envelope"></i> 邮箱凭证</h3>
+                                <button class="btn-primary" onclick="showAddEmailModal()">
+                                    <i class="fas fa-plus"></i> 添加邮箱
+                                </button>
+                            </div>
+                            <div id="email-list" class="credential-list"></div>
+                        </div>
+
+                        <!-- 手机号管理 -->
+                        <div class="credential-panel">
+                            <div class="panel-header">
+                                <h3><i class="fas fa-phone"></i> 手机号凭证</h3>
+                                <button class="btn-primary" onclick="showAddPhoneModal()">
+                                    <i class="fas fa-plus"></i> 添加手机号
+                                </button>
+                            </div>
+                            <div id="phone-list" class="credential-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 网站注册 -->
+                <section id="register" class="section">
+                    <div class="section-header">
+                        <h2>网站注册</h2>
+                        <p>添加要注册的网站并预览</p>
+                    </div>
+
+                    <div class="register-container">
+                        <div class="register-form">
+                            <div class="form-group">
+                                <label for="website-url">网站URL</label>
+                                <input type="text" id="website-url" placeholder="例如: https://example.com/register" class="form-control">
+                                <small>输入完整的网站注册页面地址</small>
+                            </div>
+
+                            <div class="website-list">
+                                <h4>待注册网站列表</h4>
+                                <div id="website-items" class="items-list"></div>
+                                <button class="btn-secondary" onclick="addWebsite()">
+                                    <i class="fas fa-plus"></i> 添加网站
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="preview-panel">
+                            <h4>预览</h4>
+                            <div id="preview-content" class="preview-area">
+                                <div class="empty-state">
+                                    <i class="fas fa-search"></i>
+                                    <p>在左侧添加网站 URL，点击预览查看注册表单信息</p>
+                                </div>
+                            </div>
+                            <button class="btn-success btn-block" id="start-register" style="display:none;" onclick="startRegistration()">
+                                <i class="fas fa-rocket"></i> 开始注册
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 账号列表 -->
+                <section id="accounts" class="section">
+                    <div class="section-header">
+                        <h2>账号列表</h2>
+                        <p>查看和管理所有已注册的账号</p>
+                    </div>
+
+                    <div class="accounts-toolbar">
+                        <input type="text" id="search-input" placeholder="搜索网站名称或邮箱..." class="search-input">
+                        <div class="export-buttons">
+                            <button class="btn-secondary" onclick="exportAccounts('json')">
+                                <i class="fas fa-download"></i> JSON
+                            </button>
+                            <button class="btn-secondary" onclick="exportAccounts('csv')">
+                                <i class="fas fa-download"></i> CSV
+                            </button>
+                            <button class="btn-secondary" onclick="exportAccounts('excel')">
+                                <i class="fas fa-download"></i> Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="accounts-table-container" class="table-container">
+                        <table class="accounts-table">
+                            <thead>
+                                <tr>
+                                    <th>网站</th>
+                                    <th>邮箱</th>
+                                    <th>手机号</th>
+                                    <th>密码</th>
+                                    <th>状态</th>
+                                    <th>注册时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="accounts-tbody">
+                                <tr>
+                                    <td colspan="7" class="text-center">暂无数据</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 设置 -->
+                <section id="settings" class="section">
+                    <div class="section-header">
+                        <h2>设置</h2>
+                        <p>配置系统偏好和参数</p>
+                    </div>
+
+                    <div class="settings-container">
+                        <div class="settings-group">
+                            <h3>密码生成设置</h3>
+                            <div class="setting-item">
+                                <label>密码长度</label>
+                                <input type="number" id="password-length" value="12" min="8" max="32" class="form-control">
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="include-symbols" checked>
+                                    包含特殊符号
+                                </label>
+                            </div>
+                            <button class="btn-secondary" onclick="testPasswordGenerator()">
+                                <i class="fas fa-key"></i> 测试密码生成
+                            </button>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>浏览器设置</h3>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="headless-mode" checked>
+                                    无头模式（后台运行）
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="use-proxy">
+                                    使用代理IP
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>数据管理</h3>
+                            <button class="btn-warning" onclick="clearAllData()">
+                                <i class="fas fa-trash"></i> 清空所有数据
+                            </button>
+                            <button class="btn-secondary" onclick="backupData()">
+                                <i class="fas fa-download"></i> 备份数据
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- 模态框 -->
+    <div id="add-email-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加邮箱凭证</h3>
+                <button class="btn-close" onclick="closeModal('add-email-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="email-input">邮箱地址</label>
+                    <input type="email" id="email-input" class="form-control" placeholder="example@gmail.com">
+                </div>
+                <div class="form-group">
+                    <label for="email-notes">备注（可选）</label>
+                    <input type="text" id="email-notes" class="form-control" placeholder="如：我的Gmail账户">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('add-email-modal')">取消</button>
+                <button class="btn-primary" onclick="submitAddEmail()">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-phone-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加手机号凭证</h3>
+                <button class="btn-close" onclick="closeModal('add-phone-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="phone-input">手机号</label>
+                    <input type="tel" id="phone-input" class="form-control" placeholder="+86 138 0000 0000">
+                </div>
+                <div class="form-group">
+                    <label for="phone-notes">备注（可选）</label>
+                    <input type="text" id="phone-notes" class="form-control" placeholder="如：我的主手机">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('add-phone-modal')">取消</button>
+                <button class="btn-primary" onclick="submitAddPhone()">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 通知 -->
+    <div id="toast" class="toast"></div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
